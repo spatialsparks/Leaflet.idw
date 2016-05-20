@@ -8,6 +8,16 @@ Leaflet.idw implements a simple inverse distance weighting algorithm. Every cell
 Demos
 
     coming soon...
+    
+Examples
+CellSize: 1
+![Image of CellSize 1](https://github.com/JoranBeaufort/Leaflet.idw/blob/master/example/Example-1px.png)
+
+CellSize: 5
+![Image of CellSize 1](https://github.com/JoranBeaufort/Leaflet.idw/blob/master/example/Example-5px.png)
+
+CellSize: 10
+![Image of CellSize 1](https://github.com/JoranBeaufort/Leaflet.idw/blob/master/example/Example-10px.png)
 
 #### Basic Usage
 
