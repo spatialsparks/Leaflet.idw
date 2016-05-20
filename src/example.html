@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>  
+<head>
+    <title>GridLayer Test</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v1.0.0-beta.2/leaflet.css"/>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+</body>
+    <script src="http://cdn.leafletjs.com/leaflet/v1.0.0-beta.2/leaflet.js"> </script>
+    
+    <script src="leaflet-idw.js"> </script>
+    <script src="exampledata.js"></script>
+
+    <script>
+
+    var map = L.map('map').setView([-37.87, 175.475], 12);
+
+    var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    var heat = L.idwLayer(addressPoints,{
+            opacity: 0.3,
+            maxZoom: 18,
+            cellSize: 10,
+            exp: 3,
+            max: 1200
+        }).addTo(map);
+    </script>
+</html>
