@@ -31,7 +31,7 @@
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    var heat = L.idwLayer(addressPoints,{
+    var idw = L.idwLayer(addressPoints,{
             opacity: 0.3,
             maxZoom: 18,
             cellSize: 10,
