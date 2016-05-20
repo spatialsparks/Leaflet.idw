@@ -6,7 +6,7 @@ Leaflet.idw implements a simple inverse distance weighting algorithm (explained 
 
 Demos
 
-    coming soon...
+    [Example with ~100 points and cell size = 3](http://www.geonet.ch/leaflet-idw/)
     
 Examples
 CellSize: 1
