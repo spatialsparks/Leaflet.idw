@@ -38,7 +38,7 @@ Constructs an IDW layer given an array of points and an object with the followin
     opacity - the opacity of the IDW layer
     max - maximum point values, 1.0 by default
     cellSize - height and width of each cell, 25 by default
-    exp - exponant used for weighting, 1 by default
+    exp - exponent used for weighting, 1 by default
     gradient - color gradient config, e.g. {0.4: 'blue', 0.65: 'lime', 1: 'red'}
 
 Each point in the input array can be either an array like [50.5, 30.5, 0.5], or a Leaflet LatLng object.
