@@ -3,7 +3,7 @@ A small Leaflet plugin to generate an IDW interpolation map
 Leaflet.heat
 
 A tiny, simple and fast Leaflet inverse distance weighting plugin. Largely based on the [Leaflet.heat] (https://github.com/Leaflet/Leaflet.heat) plugin by Vladimir Agafonkin.
-Leaflet.idw implements a simple inverse distance weighting algorithm. Every cell is calculated with the center of the cell (h/2,w/2) as the anchor from which the distance to the points is calculated.
+Leaflet.idw implements a simple inverse distance weighting algorithm (explained [here] (http://www.gitta.info/ContiSpatVar/de/html/Interpolatio_learningObject2.xhtml)). Every cell is calculated with the center of the cell (h/2,w/2) as the anchor from which the distance to the points is calculated.
 
 Demos
 
