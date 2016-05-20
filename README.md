@@ -5,7 +5,7 @@ A tiny, simple and fast Leaflet inverse distance weighting plugin. Largely based
 Leaflet.idw implements a simple inverse distance weighting algorithm (explained [here] (http://www.gitta.info/ContiSpatVar/de/html/Interpolatio_learningObject2.xhtml)). Every cell is calculated with the center of the cell (h/2,w/2) as the anchor from which the distance to the points is calculated.
 
 Demos
-* [Example with ~100 points and cell size = 3](http://www.geonet.ch/leaflet-idw/) *Mobile: Working on Samsung Galaxy s4*
+* [Example with ~100 points and cell size = 3](http://www.geonet.ch/leaflet-idw/) *(Mobile: Working on Samsung Galaxy s4)*
     
 Examples
 CellSize: 1
@@ -52,11 +52,11 @@ Performance is linked to number of points and cell size:
 * 50 - 100; Cell size 1 => Slow
 
 #### ToDo
-* Add the option for a bounding box
-* Maybe cluster points to increase performance
-  * If points in cell then take average for cell
-* Define bounding box for which points are used for each cell to increase performance
-* Introduce option to do IDW in map units and not in viewport?
+- [ ] Add the option for a bounding box
+- [ ] Maybe cluster points to increase performance
+    * If points in cell then take average for cell
+- [ ] Define bounding box for which points are used for each cell to increase performance
+- [ ] Introduce option to do IDW in map units and not in viewport?
 
 #### Changelog
 
