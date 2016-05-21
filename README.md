@@ -52,11 +52,17 @@ Performance is linked to number of points and cell size:
 * 50 - 100; Cell size 1 => Slow
 
 #### ToDo
+- [ ] Delete unneeded parts of the code
+    * Rewrite code so that no greyscale image is generated first. Directly generate and color the cells
+- [ ] Fix CellSize option: Now CellSize option X 2 = Cell width and height in pixels. (CellSize : 1 = 2x2 pixel cell)
+- [ ] Introduce a loading icon
 - [ ] Add the option for a bounding box
-- [ ] Maybe cluster points to increase performance
+- [ ] Cluster points to increase performance
     * If points in cell then take average for cell
 - [ ] Define bounding box for which points are used for each cell to increase performance
 - [ ] Introduce option to do IDW in map units and not in viewport?
+- [ ] Calculate one map tile after the other to minimise risk of browser freeze?
+- [ ] Split pipeline into processing and displaying? Save Grid after processing?
 
 #### Changelog
 
