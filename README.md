@@ -100,8 +100,9 @@ draw 349569: 787.89ms
 ```
 #### ToDo
 - [ ] Delete unneeded parts of the code
-    * Rewrite code so that no greyscale image is generated first. Directly generate and color the cells
-- [ ] Fix CellSize option: Now CellSize option X 2 = Cell width and height in pixels. (CellSize : 1 = 2x2 pixel cell)
+- [x] Rewrite code so that no greyscale image is generated first. Directly generate and color the cells
+    * Performance tested
+- [x] Fix CellSize option: Now CellSize option X 2 = Cell width and height in pixels. (CellSize : 1 = 2x2 pixel cell)
 - [ ] Introduce a loading icon
 - [ ] Add the option for a bounding box
 - [ ] Cluster points to increase performance
@@ -112,6 +113,12 @@ draw 349569: 787.89ms
 - [ ] Split pipeline into processing and displaying? Save Grid after processing?
 
 #### Changelog
+
+0.0.2 — May 22, 2016
+
+    * Fixed cell size issue (now option is in pixels).
+    * Created script to generate IDW without greyscale step. See Performance section
+
 
 0.0.1 — May 20, 2016
 
