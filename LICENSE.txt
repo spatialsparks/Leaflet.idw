@@ -1,4 +1,4 @@
-Copyright (c) 2016, Manuel Bär
+Copyright (c) 2016, Manuel BÃ¤r (www.geonet.ch)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are

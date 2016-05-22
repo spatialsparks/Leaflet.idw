@@ -1,5 +1,5 @@
 /*
- (c) 2016, Manuel Bär
+ (c) 2016, Manuel Bär (www.geonet.ch)
  Leaflet.idw, a tiny and fast inverse distance weighting plugin for Leaflet.
  Largely based on the source code of Leaflet.heat by Vladimir Agafonkin (c) 2014
  https://github.com/Leaflet/Leaflet.heat
@@ -127,7 +127,7 @@
 
         _colorize: function (pixels, gradient, opacity) {
             for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-                j = pixels[i + 3] * 4; // get gradient color from opacity value
+                j = pixels[i + 3] * 4; 
 
                 if (j) {
                     pixels[i] = gradient[j];
@@ -282,6 +282,7 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             panePos = this._map._getMapPanePos(),
             offsetX = 0, 
             offsetY = 0,
+
             i, len, p, cell, x, y, j, len2, k;
             
             console.log(nCellX);
@@ -290,6 +291,7 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
         console.time('process');
         
         for (i = 0, len = nCellY; i < len; i++) {
+
             for (j = 0, len2 = nCellX; j < len2; j++) {     
             
                 var x=i*r,y=j*r;
@@ -297,7 +299,6 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 
                 for (k = 0, len3 = this._latlngs.length; k < len3; k++) {          
                 
-                    // Get distance between cell and point
                     var p = this._map.latLngToContainerPoint(this._latlngs[k]);                    
                     var cp = L.point((y-cellCen), (x-cellCen));                    
                     var dist = cp.distanceTo(p);
@@ -315,7 +316,6 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 interpolVal = numerator/denominator;
                 
                 cell = [j*r, i*r, interpolVal];
-
                 
                 if (cell) {
                     data.push([
@@ -326,9 +326,10 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 }
             }
         }
-
+        
          console.timeEnd('process');
          console.time('draw ' + data.length);
+
         this._idw.data(data).draw(this.options.opacity);
          console.timeEnd('draw ' + data.length);
 
