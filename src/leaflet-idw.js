@@ -280,18 +280,17 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             nCellX = Math.ceil((bounds.max.x-bounds.min.x)/r)+1,
             nCellY = Math.ceil((bounds.max.y-bounds.min.y)/r)+1,
             panePos = this._map._getMapPanePos(),
+
             offsetX = 0, 
             offsetY = 0,
-
             i, len, p, cell, x, y, j, len2, k;
             
             console.log(nCellX);
             console.log(nCellY);
             
-        console.time('process');
+            console.time('process');
         
         for (i = 0, len = nCellY; i < len; i++) {
-
             for (j = 0, len2 = nCellX; j < len2; j++) {     
             
                 var x=i*r,y=j*r;
@@ -303,7 +302,6 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                     var cp = L.point((y-cellCen), (x-cellCen));                    
                     var dist = cp.distanceTo(p);
                     var dist2 = Math.pow(dist, exp);
-
                     var val =
                             this._latlngs[k].alt !== undefined ? this._latlngs[k].alt :
                             this._latlngs[k][2] !== undefined ? +this._latlngs[k][2] : 1;
@@ -326,12 +324,10 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 }
             }
         }
-        
-         console.timeEnd('process');
-         console.time('draw ' + data.length);
-
+        console.timeEnd('process');
+        console.time('draw ' + data.length);
         this._idw.data(data).draw(this.options.opacity);
-         console.timeEnd('draw ' + data.length);
+        console.timeEnd('draw ' + data.length);
 
         this._frame = null;
     },

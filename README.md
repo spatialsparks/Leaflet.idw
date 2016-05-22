@@ -98,7 +98,6 @@ process: 8813.94ms
 draw 349569: timer started 
 draw 349569: 787.89ms
 ```
-
 #### ToDo
 - [ ] Delete unneeded parts of the code
     * Rewrite code so that no greyscale image is generated first. Directly generate and color the cells
