@@ -3,7 +3,6 @@
  Leaflet.idw, a tiny and fast inverse distance weighting plugin for Leaflet.
  Largely based on the source code of Leaflet.heat by Vladimir Agafonkin (c) 2014
  https://github.com/Leaflet/Leaflet.heat
- version: 0.0.2
 */
 !function(){
 "use strict";
@@ -23,7 +22,7 @@
     
     simpleidw.prototype = {
 
-        defaultCellSize: 25,
+        defaultCellSize: 20,
 
         defaultGradient: {
             0: '#000066',
@@ -60,17 +59,11 @@
         },
 
         cellSize: function (r) {
-            // create a grayscale blurred cell image that we'll use for drawing points
             var cell = this._cell = document.createElement("canvas"),
-                ctx = cell.getContext('2d');
-                this._r = r;
+            ctx = cell.getContext('2d');   
+            
+            this._r = r;
 
-            cell.width = cell.height = r;
-
-            ctx.beginPath();
-            ctx.rect(0, 0, r, r);
-            ctx.fill();
-            ctx.closePath();
 
             return this;
         },
@@ -103,39 +96,21 @@
 
         draw: function (opacity) {
             if (!this._cell) this.cellSize(this.defaultCellSize);
-            if (!this._grad) this.gradient(this.defaultGradient);
-
+            if (!this._grad) this.gradient(this.defaultGradient);            
+            
             var ctx = this._ctx;
+            var grad =  this._grad;
 
             ctx.clearRect(0, 0, this._width, this._height);
 
-            // draw a grayscale heatmap by putting a blurred cell at each data point
             for (var i = 0, len = this._data.length, p; i < len; i++) {
-                p = this._data[i];
-                ctx.globalAlpha = p[2] / this._max;
-                ctx.drawImage(this._cell, p[0] - this._r, p[1] - this._r);
+                var p = this._data[i];
+                var j = Math.round((p[2] / this._max)*255)*4;
+                ctx.fillStyle = 'rgba('+grad[j]+','+grad[j+1]+','+grad[j+2]+','+opacity+')';
+                ctx.fillRect(p[0] - this._r,p[1] - this._r,this._r,this._r);     
             }
-
-            // colorize the heatmap, using opacity value of each pixel to get the right color from our gradient
-            var colored = ctx.getImageData(0, 0, this._width, this._height);
-            this._colorize(colored.data, this._grad, opacity);
-            
-            ctx.putImageData(colored, 0, 0);
 
             return this;
-        },
-
-        _colorize: function (pixels, gradient, opacity) {
-            for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-                j = pixels[i + 3] * 4; // get gradient color from opacity value
-
-                if (j) {
-                    pixels[i] = gradient[j];
-                    pixels[i + 1] = gradient[j + 1];
-                    pixels[i + 2] = gradient[j + 2];
-                    pixels[i + 3] = opacity*255;
-                }
-            }
         }
     },
     window.simpleidw = simpleidw
@@ -264,6 +239,9 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
         if (!this._map) {
             return;
         }
+
+        console.log(this._idw._r);
+        
         var data = [],
             r = this._idw._r,
             size = this._map.getSize(),
@@ -280,8 +258,8 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             nCellX = Math.ceil((bounds.max.x-bounds.min.x)/r)+1,
             nCellY = Math.ceil((bounds.max.y-bounds.min.y)/r)+1,
             panePos = this._map._getMapPanePos(),
-            offsetX = 0, 
-            offsetY = 0,
+            offsetX = 0, //panePos.x % cellSize,
+            offsetY = 0, // panePos.y % cellSize,
             i, len, p, cell, x, y, j, len2, k;
             
             console.log(nCellX);
@@ -290,6 +268,7 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
         console.time('process');
         
         for (i = 0, len = nCellY; i < len; i++) {
+            //grid[i] = [];
             for (j = 0, len2 = nCellX; j < len2; j++) {     
             
                 var x=i*r,y=j*r;
@@ -314,8 +293,7 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 
                 interpolVal = numerator/denominator;
                 
-                cell = [j*r, i*r, interpolVal];
-
+                cell = [j*r, i*r, interpolVal];              
                 
                 if (cell) {
                     data.push([
@@ -327,10 +305,11 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             }
         }
 
-         console.timeEnd('process');
-         console.time('draw ' + data.length);
+        console.timeEnd('process');
+
+        console.time('draw ' + data.length);
         this._idw.data(data).draw(this.options.opacity);
-         console.timeEnd('draw ' + data.length);
+        console.timeEnd('draw ' + data.length);
 
         this._frame = null;
     },

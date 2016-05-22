@@ -3,7 +3,6 @@
  Leaflet.idw, a tiny and fast inverse distance weighting plugin for Leaflet.
  Largely based on the source code of Leaflet.heat by Vladimir Agafonkin (c) 2014
  https://github.com/Leaflet/Leaflet.heat
- version: 0.0.2
 */
 !function(){
 "use strict";
@@ -62,13 +61,13 @@
         cellSize: function (r) {
             // create a grayscale blurred cell image that we'll use for drawing points
             var cell = this._cell = document.createElement("canvas"),
-                ctx = cell.getContext('2d');
-                this._r = r;
+                ctx = cell.getContext('2d'),
+                r2 = this._r = r*2;
 
-            cell.width = cell.height = r;
+            cell.width = cell.height = r2 * 2;
 
             ctx.beginPath();
-            ctx.rect(0, 0, r, r);
+            ctx.rect(0, 0, r2, r2);
             ctx.fill();
             ctx.closePath();
 
@@ -275,13 +274,13 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             max = this.options.max === undefined ? 1 : this.options.max,
             maxZoom = this.options.maxZoom === undefined ? this._map.getMaxZoom() : this.options.maxZoom,
             v = 1, 
-            cellCen = r / 2,
+            cellSize = r / 2,
             grid = [],
             nCellX = Math.ceil((bounds.max.x-bounds.min.x)/r)+1,
             nCellY = Math.ceil((bounds.max.y-bounds.min.y)/r)+1,
             panePos = this._map._getMapPanePos(),
-            offsetX = 0, 
-            offsetY = 0,
+            offsetX = 0, //panePos.x % cellSize,
+            offsetY = 0, // panePos.y % cellSize,
             i, len, p, cell, x, y, j, len2, k;
             
             console.log(nCellX);
@@ -290,6 +289,7 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
         console.time('process');
         
         for (i = 0, len = nCellY; i < len; i++) {
+            //grid[i] = [];
             for (j = 0, len2 = nCellX; j < len2; j++) {     
             
                 var x=i*r,y=j*r;
@@ -299,10 +299,16 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 
                     // Get distance between cell and point
                     var p = this._map.latLngToContainerPoint(this._latlngs[k]);                    
-                    var cp = L.point((y-cellCen), (x-cellCen));                    
+                    var cp = L.point((y-cellSize), (x-cellSize));                    
                     var dist = cp.distanceTo(p);
                     var dist2 = Math.pow(dist, exp);
-
+                    /*
+                    if(i==2 && j == 2){
+                        console.log(p);
+                        console.log(cp);
+                        console.log(dist);
+                    }
+                    */
                     var val =
                             this._latlngs[k].alt !== undefined ? this._latlngs[k].alt :
                             this._latlngs[k][2] !== undefined ? +this._latlngs[k][2] : 1;
@@ -315,7 +321,37 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                 interpolVal = numerator/denominator;
                 
                 cell = [j*r, i*r, interpolVal];
+                
+                /*
+                    var DistC2P = containerPointToLatLng
+                    
+                    zj = 
 
+                    var k =
+                            this._latlngs[i].alt !== undefined ? this._latlngs[i].alt :
+                            this._latlngs[i][2] !== undefined ? +this._latlngs[i][2] : 1;
+                            
+                    
+                    if (bounds.contains(p)) {
+                        x = Math.floor((p.x - offsetX) / cellSize) + 2;
+                        y = Math.floor((p.y - offsetY) / cellSize) + 2;
+
+                        var k =
+                            this._latlngs[i].alt !== undefined ? this._latlngs[i].alt :
+                            this._latlngs[i][2] !== undefined ? +this._latlngs[i][2] : 1;
+
+                        grid[y] = grid[y] || [];
+                        cell = grid[y][x];
+
+                        if (!cell) {
+                            grid[y][x] = [p.x, p.y, k];
+
+                        }
+                    }
+                }
+                */
+                //grid[i][j] = [i, j, 0.1];
+                
                 
                 if (cell) {
                     data.push([
@@ -327,6 +363,42 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
             }
         }
 
+/*        
+        for (i = 0, len = this._latlngs.length; i < len; i++) {
+            p = this._map.latLngToContainerPoint(this._latlngs[i]);
+            if (bounds.contains(p)) {
+                x = Math.floor((p.x - offsetX) / cellSize) + 2;
+                y = Math.floor((p.y - offsetY) / cellSize) + 2;
+
+                var k =
+                    this._latlngs[i].alt !== undefined ? this._latlngs[i].alt :
+                    this._latlngs[i][2] !== undefined ? +this._latlngs[i][2] : 1;
+
+                grid[y] = grid[y] || [];
+                cell = grid[y][x];
+
+                if (!cell) {
+                    grid[y][x] = [p.x, p.y, k];
+
+                }
+            }
+        }
+
+        for (i = 0, len = grid.length; i < len; i++) {
+            if (grid[i]) {
+                for (j = 0, len2 = grid[i].length; j < len2; j++) {
+                    cell = grid[i][j];
+                    if (cell) {
+                        data.push([
+                            Math.round(cell[0]),
+                            Math.round(cell[1]),
+                            Math.min(cell[2], max)
+                        ]);
+                    }
+                }
+            }
+        }
+        */
          console.timeEnd('process');
          console.time('draw ' + data.length);
         this._idw.data(data).draw(this.options.opacity);

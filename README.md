@@ -48,8 +48,56 @@ Third argument in each LatLng point represents point value. Unless max option is
 #### Performance
 
 Performance is linked to number of points and cell size:
-* 1 - 50 points; Cell size 1 => OK
-* 50 - 100; Cell size 1 => Slow
+```
+///////////////////////////////////////////////////////////
+
+CellSize: 10px // ~100 Points // 14040 Cells
+
+Draw directly with color:
+process: timer started
+process: 242.58ms 
+draw 14040: timer started 
+draw 14040: 24.27ms
+
+Draw greyscale first:
+process: timer started 
+process: 244.68ms 
+draw 14040: timer started 
+draw 14040: 40.71ms
+
+
+///////////////////////////////////////////////////////////
+
+CellSize: 5px // ~100 Points // 56889 Cells
+
+Draw directly with color:
+process: timer started 
+process: 1068.22ms 
+draw 56889: timer started 1
+draw 56889: 98.03ms
+
+Draw greyscale first:
+process: timer started 
+process: 1078.15ms 
+draw 56889: timer started 
+draw 56889: 80.17ms
+
+///////////////////////////////////////////////////////////
+
+CellSize: 2px // ~100 Points // 349569 Cells
+
+Draw directly with color:
+process: timer started 
+process: 8775.47ms 
+draw 349569: timer started 
+draw 349569: 493.78ms
+
+Draw greyscale first:
+process: timer started 
+process: 8813.94ms 
+draw 349569: timer started 
+draw 349569: 787.89ms
+```
 
 #### ToDo
 - [ ] Add the option for a bounding box
