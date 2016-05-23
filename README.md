@@ -72,15 +72,15 @@ CellSize: 5px // ~100 Points // 56889 Cells
 
 Draw directly with color:
 process: timer started 
-process: 1068.22ms 
-draw 56889: timer started 1
-draw 56889: 98.03ms
-
-Draw greyscale first:
-process: timer started 
 process: 1078.15ms 
 draw 56889: timer started 
 draw 56889: 80.17ms
+
+Draw greyscale first:
+process: timer started 
+process: 1068.22ms 
+draw 56889: timer started 1
+draw 56889: 98.03ms
 
 ///////////////////////////////////////////////////////////
 
@@ -88,15 +88,16 @@ CellSize: 2px // ~100 Points // 349569 Cells
 
 Draw directly with color:
 process: timer started 
+process: 8813.94ms 
+draw 349569: timer started 
+draw 349569: 787.89ms
+
+Draw greyscale first:
+process: timer started 
 process: 8775.47ms 
 draw 349569: timer started 
 draw 349569: 493.78ms
 
-Draw greyscale first:
-process: timer started 
-process: 8813.94ms 
-draw 349569: timer started 
-draw 349569: 787.89ms
 ```
 #### ToDo
 - [ ] Delete unneeded parts of the code
