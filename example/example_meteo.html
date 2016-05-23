@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>  
+<head>
+    <title>GridLayer Test</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v1.0.0-beta.2/leaflet.css"/>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+</body>
+    <script src="http://cdn.leafletjs.com/leaflet/v1.0.0-beta.2/leaflet.js"> </script>
+    
+    <script src="../src/leaflet-idw.js"> </script>
+
+    <script>
+    
+    var meteoPoints = [
+            [ 47.11285 , 7.222309, 8], //Ipsach
+            [ 47.085272, 7.20377 , 12], //Mörigen
+            [ 47.092285, 7.156734, 11], //Twann
+            [ 47.13294 , 7.220936, 0], //Vingelz
+            [ 47.088311, 7.128925, 15], //Twannberg
+            [ 47.124765, 7.234669, 5], //Nidau
+            [ 47.055107, 7.07159 , 1]  //lelanderon
+        ];
+
+    var map = L.map('map').setView([47.085107, 7.13], 12);
+
+    var tiles = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    var idw = L.idwLayer(meteoPoints,{
+            opacity: 0.3,
+            maxZoom: 18,
+            cellSize: 10,
+            exp: 3,
+            max: 50
+        }).addTo(map);
+    </script>
+</html>
+

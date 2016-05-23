@@ -26,7 +26,7 @@
         defaultCellSize: 25,
 
         defaultGradient: {
-            0: '#000066',
+            0.0: '#000066',
             0.1: 'blue',
             0.2: 'cyan',
             0.3: 'lime',
@@ -36,7 +36,7 @@
             0.7: 'Maroon',
             0.8: '#660066',
             0.9: '#990099',
-            1: '#ff66ff'
+            1.0: '#ff66ff'
         },
 
         data: function (data) {
@@ -104,12 +104,12 @@
         draw: function (opacity) {
             if (!this._cell) this.cellSize(this.defaultCellSize);
             if (!this._grad) this.gradient(this.defaultGradient);
-
+            
             var ctx = this._ctx;
 
             ctx.clearRect(0, 0, this._width, this._height);
 
-            // draw a grayscale heatmap by putting a blurred cell at each data point
+            // draw a grayscale idwmap by putting a cell at each data point
             for (var i = 0, len = this._data.length, p; i < len; i++) {
                 p = this._data[i];
                 ctx.globalAlpha = p[2] / this._max;
@@ -129,12 +129,10 @@
             for (var i = 0, len = pixels.length, j; i < len; i += 4) {
                 j = pixels[i + 3] * 4; 
 
-                if (j) {
                     pixels[i] = gradient[j];
                     pixels[i + 1] = gradient[j + 1];
                     pixels[i + 2] = gradient[j + 2];
-                    pixels[i + 3] = opacity*255;
-                }
+                    pixels[i + 3] = opacity*256;
             }
         }
     },
@@ -153,8 +151,6 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
     */
     initialize: function (latlngs, options) {
         this._latlngs = latlngs;
-                console.log(latlngs);
-
         L.setOptions(this, options);
     },
 
@@ -301,13 +297,21 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
                     var p = this._map.latLngToContainerPoint(this._latlngs[k]);                    
                     var cp = L.point((y-cellCen), (x-cellCen));                    
                     var dist = cp.distanceTo(p);
-                    var dist2 = Math.pow(dist, exp);
+                    
                     var val =
                             this._latlngs[k].alt !== undefined ? this._latlngs[k].alt :
                             this._latlngs[k][2] !== undefined ? +this._latlngs[k][2] : 1;
                     
-                    numerator += val/dist2;
-                    denominator += 1/dist2;             
+                    if(dist===0){
+                            numerator = val;
+                            denominator = 1;
+                            break;
+                    }
+                    
+                    var dist2 = Math.pow(dist, exp);
+
+                    numerator += (val/dist2);
+                    denominator += (1/dist2);             
                             
                 }
                 
