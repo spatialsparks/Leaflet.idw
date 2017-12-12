@@ -1,13 +1,14 @@
 # Leaflet.idw
 A small Leaflet plugin to generate an IDW interpolated map
 
-A tiny, simple and fast Leaflet inverse distance weighting plugin. Largely based on the [Leaflet.heat] (https://github.com/Leaflet/Leaflet.heat) plugin by Vladimir Agafonkin.
-Leaflet.idw implements a simple inverse distance weighting algorithm (explained [here] (http://www.gitta.info/ContiSpatVar/de/html/Interpolatio_learningObject2.xhtml)). Every cell is calculated with the center of the cell (h/2,w/2) as the anchor from which the distance to the points is calculated.
+A tiny, simple and fast Leaflet inverse distance weighting plugin. Largely based on the [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat) plugin by Vladimir Agafonkin.
 
-Demos
+Leaflet.idw implements a [simple inverse distance weighting algorithm](http://www.gitta.info/ContiSpatVar/de/html/Interpolatio_learningObject2.xhtml)). Every cell is calculated with the center of the cell (h/2,w/2) as the anchor from which the distance to the points is calculated.
+
+## Demos
 * [Example with ~100 points and cell size = 3](http://www.geonet.ch/leaflet-idw/) *(Mobile: Working on Samsung Galaxy s4)*
     
-Examples
+## Examples
 CellSize: 1
 ![Image of CellSize 1](https://github.com/JoranBeaufort/Leaflet.idw/blob/master/example/Example-1px.png)
 
@@ -17,7 +18,7 @@ CellSize: 5
 CellSize: 10
 ![Image of CellSize 1](https://github.com/JoranBeaufort/Leaflet.idw/blob/master/example/Example-10px.png)
 
-#### Basic Usage
+# Basic Usage
 
 ```
 var idw = L.idwLayer([
@@ -31,7 +32,7 @@ To include the plugin, just use leaflet-idw.js from the src folder:
 
 ```<script src="leaflet-idw.js"></script>```
 
-#### Options
+## Options
 
 Constructs an IDW layer given an array of points and an object with the following options:
 
@@ -45,7 +46,7 @@ Each point in the input array can be either an array like [50.5, 30.5, 0.5], or 
 
 Third argument in each LatLng point represents point value. Unless max option is specified, values should range between 0.0 and 1.0.
 
-#### Performance
+## Performance
 
 Performance is linked to number of points and cell size:
 ```
@@ -99,7 +100,7 @@ draw 349569: timer started
 draw 349569: 493.78ms
 
 ```
-#### ToDo
+# ToDo
 - [ ] Delete unneeded parts of the code
 - [x] Rewrite code so that no greyscale image is generated first. Directly generate and color the cells
     * Performance tested
@@ -113,7 +114,7 @@ draw 349569: 493.78ms
 - [ ] Calculate one map tile after the other to minimise risk of browser freeze?
 - [ ] Split pipeline into processing and displaying? Save Grid after processing?
 
-#### Changelog
+# Changelog
 
 0.0.2 — May 22, 2016
 
