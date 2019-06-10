@@ -18,6 +18,7 @@
         this._height = canvas.height;
 
         this._max = 1;
+        this._range = 0.0;
         this._data = [];
     }
     
@@ -46,6 +47,11 @@
 
         max: function (max) {
             this._max = max;
+            return this;
+        },
+
+        range: function (range) {
+            this._range = range;
             return this;
         },
 
@@ -110,8 +116,8 @@
             ctx.clearRect(0, 0, this._width, this._height);
 
             // draw a grayscale idwmap by putting a cell at each data point
-            for (var i = 0, len = this._data.length, p; i < len; i++) {
-                p = this._data[i];
+            for (var i = this._data.length - 1; i >= 0; i--) {
+                var p = this._data[i];
                 ctx.globalAlpha = p[2] / this._max;
                 ctx.drawImage(this._cell, p[0] - this._r, p[1] - this._r);
             }
@@ -127,12 +133,12 @@
 
         _colorize: function (pixels, gradient, opacity) {
             for (var i = 0, len = pixels.length, j; i < len; i += 4) {
-                j = pixels[i + 3] * 4; 
-
-                    pixels[i] = gradient[j];
-                    pixels[i + 1] = gradient[j + 1];
-                    pixels[i + 2] = gradient[j + 2];
-                    pixels[i + 3] = opacity*256;
+                j = pixels[i + 3] * 4;
+                if(this._range > 0.0 && j === 0) continue; 
+                pixels[i] = gradient[j];
+                pixels[i + 1] = gradient[j + 1];
+                pixels[i + 2] = gradient[j + 2];
+                pixels[i + 3] = opacity * 256;
             }
         }
     },
@@ -232,12 +238,9 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
     _updateOptions: function () {
         this._idw.cellSize(this.options.cellSize || this._idw.defaultCellSize);
 
-        if (this.options.gradient) {
-            this._idw.gradient(this.options.gradient);
-        }
-        if (this.options.max) {
-            this._idw.max(this.options.max);
-        }
+        if(this.options.gradient) this._idw.gradient(this.options.gradient);
+        if(this.options.max) this._idw.max(this.options.max);
+        if(this.options.range) this._idw.range(this.options.range);
     },
 
     _reset: function () {
@@ -257,81 +260,120 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
     },
 
     _redraw: function () {
-        if (!this._map) {
-            return;
-        }
-        var data = [],
+        if (!this._map) return;
+
+        var map = this._map,
+            data = [],
+            // side length of a cell
             r = this._idw._r,
+            // map size in pixel
             size = this._map.getSize(),
+            // bounds of pixel coordinate on the screen
             bounds = new L.Bounds(
                 L.point([-r, -r]),
-                size.add([r, r])),
-
+                size.add([r, r])
+                ),
+            // power parameter
             exp = this.options.exp === undefined ? 1 : this.options.exp,
-            max = this.options.max === undefined ? 1 : this.options.max,
+            // max idw value
+            maxVal = this.options.max === undefined ? 1 : this.options.max,
             maxZoom = this.options.maxZoom === undefined ? this._map.getMaxZoom() : this.options.maxZoom,
-            v = 1, 
+            range = this.options.range === undefined ? 0.0 : this.options.range,
             cellCen = r / 2,
-            grid = [],
-            nCellX = Math.ceil((bounds.max.x-bounds.min.x)/r)+1,
-            nCellY = Math.ceil((bounds.max.y-bounds.min.y)/r)+1,
-            panePos = this._map._getMapPanePos(),
+            nCellX = Math.ceil((bounds.max.x - bounds.min.x) / r) + 1,
+            nCellY = Math.ceil((bounds.max.y - bounds.min.y) / r) + 1;
+            
+        var cellsn = new Array(nCellY),
+            cellsd = new Array(nCellY);
+        // initialize cellsn and cellsd to 0
+        for (var i = 0; i < nCellY; i++) {
+            cellsn[i] = new Array(nCellX);
+            cellsd[i] = new Array(nCellX);
+            for (var j = 0; j < nCellX; j++) {
+                cellsn[i][j] = 0.0;
+                cellsd[i][j] = 0.0;
+          }
+        }
+        console.log("number of cell on x-axis:", nCellX);
+        console.log("number of cell on y-axis:", nCellY);
+        console.time("process IDW");
+        if(range > 0.0) {
+            // left top lat lon coordinate of the screen
+            var leftTop = map.containerPointToLatLng([0, 0]),
+                // right bottom lat lon coordinate of the screen
+                rightBottom = map.containerPointToLatLng([map.getSize().x, map.getSize().y]),
+                // km per pixel on x-axis
+                offsetX = Math.abs(leftTop.lng - rightBottom.lng) * 104.64 / map.getSize().x,
+                // km per pixel on y-axis
+                offsetY = Math.abs(leftTop.lat - rightBottom.lat) * 110.69 / map.getSize().y
+            for(var index = this._latlngs.length - 1; index >= 0; index--) {
+                var p = this._map.latLngToContainerPoint(
+                        L.latLng(this._latlngs[index][0], this._latlngs[index][1])
+                    ),
+                    // left pixel coordinate of the cell
+                    x1 = p.x - range / offsetX,
+                    // right
+                    x2 = p.x + range / offsetX,
+                    // top
+                    y1 = p.y - range / offsetY,
+                    // bottom
+                    y2 = p.y + range / offsetY;
 
-            offsetX = 0, 
-            offsetY = 0,
-            i, len, p, cell, x, y, j, len2, k;
-            
-            console.log(nCellX);
-            console.log(nCellY);
-            
-            console.time('process');
-        
-        for (i = 0, len = nCellY; i < len; i++) {
-            for (j = 0, len2 = nCellX; j < len2; j++) {     
-            
-                var x=i*r,y=j*r;
-                var numerator=0,denominator=0;
-                
-                for (k = 0, len3 = this._latlngs.length; k < len3; k++) {          
-                
-                    var p = this._map.latLngToContainerPoint(this._latlngs[k]);                    
-                    var cp = L.point((y-cellCen), (x-cellCen));                    
-                    var dist = cp.distanceTo(p);
-                    
-                    var val =
-                            this._latlngs[k].alt !== undefined ? this._latlngs[k].alt :
-                            this._latlngs[k][2] !== undefined ? +this._latlngs[k][2] : 1;
-                    
-                    if(dist===0){
-                            numerator = val;
-                            denominator = 1;
-                            break;
-                    }
-                    
-                    var dist2 = Math.pow(dist, exp);
+                    // cell coordinate
+                    x1 = Math.round(x1 / r + 0.5);
+                    x2 = Math.ceil(x2 / r - 0.5);
+                    y1 = Math.round(y1 / r + 0.5);
+                    y2 = Math.ceil(y2 / r - 0.5);
 
-                    numerator += (val/dist2);
-                    denominator += (1/dist2);             
-                            
+                    // check if x1, x2, y1, y2 out of cellsn, cellsd bounds
+                    if (x2 < 0) continue;
+                    if (x1 >= nCellX) continue;
+                    if (y2 < 0) continue;
+                    if (y1 >= nCellY) continue;
+
+                    if (x1 < 0) x1 = 0;
+                    if (x2 >= nCellX) x2 = nCellX - 1;
+                    if (y1 < 0) y1 = 0;
+                    if (y2 >= nCellY) y2 = nCellY - 1;
+                this._idwCalculation(p, r, exp, index, x1, x2, y1, y2, cellCen, cellsd, cellsn, 
+                    range, offsetX, offsetY);
+            }
+        } else {
+            for(var index = this._latlngs.length - 1; index >= 0; index--) {
+                var p = this._map.latLngToContainerPoint(L.latLng(this._latlngs[index][0], this._latlngs[index][1]));
+                this._idwCalculation(p, r, exp, index,
+                    0, nCellX - 1, 0, nCellY - 1, cellCen, cellsd, cellsn, range);
+            }
+        }
+
+        for (var i = 0; i < nCellY; i++) {
+            for (var j = 0; j < nCellX; j++) {
+                if (cellsd[i][j] < 0.0) {
+                    cellsd[i][j] = 1.0;
                 }
-                
-                interpolVal = numerator/denominator;
-                
-                cell = [j*r, i*r, interpolVal];
-                
-                if (cell) {
-                    data.push([
-                        Math.round(cell[0]),
-                        Math.round(cell[1]),
-                        Math.min(cell[2], max)
-                    ]);
+                var interpolVal = 0.0
+                if (cellsd[i][j] === 0.0) {
+                    // cell not used
+                    interpolVal = 0.0;
+                } else {
+                    interpolVal = cellsn[i][j] / cellsd[i][j];
+                }
+                // IDW value
+                var cell = [
+                    Math.round(j * r), 
+                    Math.round(i * r), 
+                    Math.min(interpolVal, maxVal)
+                ];
+
+                if (cell !== undefined) {
+                    data.push(cell);
                 }
             }
         }
-        console.timeEnd('process');
-        console.time('draw ' + data.length);
+        console.timeEnd('process IDW');
+        console.time("draw " + data.length + " cells");
         this._idw.data(data).draw(this.options.opacity);
-        console.timeEnd('draw ' + data.length);
+        console.timeEnd("draw " + data.length + " cells");
 
         this._frame = null;
     },
@@ -345,6 +387,49 @@ L.IdwLayer = (L.Layer ? L.Layer : L.Class).extend({
 
         } else {
             this._canvas.style[L.DomUtil.TRANSFORM] = L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
+        }
+    },
+
+    _idwCalculation: function(p, r, exp, index, x1, x2, y1, y2, cellCen, cellsd, cellsn, 
+        range, offsetX, offsetY) {
+        // array are passed by reference
+        for (var j = x1; j <= x2; j++) {
+            for (var i = y1; i <= y2; i++) {
+                if (cellsd[i][j] < 0.0) {
+                    // center of the cell
+                    // cellsd = -1
+                    continue;
+                }
+                // estimated point pixel coordinate
+                var cp = L.point((j * r + cellCen), (i * r + cellCen));
+
+                if(range > 0.0) {
+                    // distance in km on x-axis
+                    var x = (p.x - cp.x) * offsetX;
+                    // distance in km on y-axis
+                    var y = (p.y - cp.y) * offsetY;
+                    var dist = Math.sqrt(x * x + y * y);
+                    if (dist > range) {
+                        // point out of effective range
+                        continue;
+                    }
+                }
+                // IDW value
+                var val = this._latlngs[index].alt !== undefined ? this._latlngs[index].alt :
+                        this._latlngs[index][2] !== undefined ? +this._latlngs[index][2] : 1;
+                // pixel distance
+                var d = cp.distanceTo(p);
+
+                if (d === 0.0) {
+                    // cell center fills in original value
+                    cellsn[i][j] = val;
+                    cellsd[i][j] = -1;
+                } else {
+                    var dExp = Math.pow(d, exp);
+                    cellsn[i][j] += (val / dExp);
+                    cellsd[i][j] += (1.0 / dExp);
+                }
+            }
         }
     }
 });
